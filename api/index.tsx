@@ -28,7 +28,7 @@ app.frame('/', (c) => {
   return c.res({
     image: '/ankydegengif.gif',
     intents: [
-      <Button action="/pick-random-number">MINT</Button>,
+      <Button action="/pick-random-number">Start 🛸</Button>,
     ]
   })
 })
@@ -80,6 +80,8 @@ app.frame('/mint-page', async (c) => {
 
   // Generate a random number between 1 and 8
   const maxMint = Math.floor(Math.random() * 8) + 1;
+
+  const total = maxMint.toString();
 
   try {
     const responseUserData = await fetch(`${baseUrlNeynarV2}/user/bulk?fids=${fid}`, {
@@ -178,7 +180,7 @@ app.frame('/mint-page', async (c) => {
         </Box>
       ),
       intents: [
-        <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint NFT 👽</Button.Transaction>,
+        <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint {total} NFT 👽</Button.Transaction>,
       ]
     });
   } catch (error) {

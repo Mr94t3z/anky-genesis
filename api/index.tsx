@@ -1,11 +1,11 @@
-import { Button, Frog, parseEther } from 'frog'
+import { Button, Frog } from 'frog'
 import { handle } from 'frog/vercel'
 import { Box, Image, Heading, Text, VStack, Spacer, vars } from "../lib/ui.js";
-import { abi } from "../lib/ankyGenesisAbi.js";
+import { abi } from "../lib/ankyDegenGenesisAbi.js";
 
 // Uncomment this packages to tested on local server
-import { devtools } from 'frog/dev';
-import { serveStatic } from 'frog/serve-static';
+// import { devtools } from 'frog/dev';
+// import { serveStatic } from 'frog/serve-static';
 
 export const app = new Frog({
   assetsPath: '/',
@@ -26,21 +26,9 @@ app.frame('/', (c) => {
   // userMintLimits[userId] = mintLimit;
 
   return c.res({
-    image: (
-      <Box
-        grow
-        alignVertical="center"
-        width="100%"
-        height="100%"
-      >
-        <Image 
-          src="/banner.jpeg"
-          objectFit="contain"
-        />
-      </Box>
-    ),
+    image: '/ankydegengif.gif',
     intents: [
-      <Button action="/mint-page">Try your lucky 🎰 </Button>,
+      <Button action="/mint-page">MINT</Button>,
     ]
   })
 })
@@ -81,19 +69,19 @@ app.frame('/mint-page', async (c) => {
             </Heading>
             <Spacer size="16" />
             <Text align="center" color="white" size="18">
-              Congrats @{userData.username}! You can mint {userMintLimits} NFTs.
+              Congrats @{userData.username}! You can mint NFTs.
             </Text>
             <Spacer size="22" />
               <Box flexDirection="row" justifyContent="center">
-                  <Text color="chocolate" align="center" size="14">created by</Text>
+                  <Text color="chocolate" align="center" size="14">By</Text>
                   <Spacer size="10" />
-                  <Text color="yellow" decoration="underline" align="center" size="14"> @0x94t3z</Text>
+                  <Text color="yellow" decoration="underline" align="center" size="14"> @jpfraneto & @0x94t3z</Text>
               </Box>
           </VStack>
         </Box>
       ),
       intents: [
-        <Button.Transaction target="/mint">Mint NFT</Button.Transaction>,
+        <Button.Transaction target={`/mint/${fid}`}>Mint NFT</Button.Transaction>,
       ]
     });
   } catch (error) {
@@ -118,9 +106,9 @@ app.frame('/mint-page', async (c) => {
             </Text>
             <Spacer size="22" />
               <Box flexDirection="row" justifyContent="center">
-                    <Text color="chocolate" align="center" size="14">created by</Text>
+                    <Text color="chocolate" align="center" size="14">By</Text>
                     <Spacer size="10" />
-                    <Text color="yellow" decoration="underline" align="center" size="14"> @0x94t3z</Text>
+                    <Text color="yellow" decoration="underline" align="center" size="14"> @jpfraneto & @0x94t3z</Text>
               </Box>
           </VStack>
         </Box>
@@ -132,42 +120,7 @@ app.frame('/mint-page', async (c) => {
   }
 });
  
-app.frame('/finish', (c) => {
-  const { transactionId } = c
-  return c.res({
-    image: (
-      <Box
-        grow
-        alignVertical="center"
-        backgroundColor="anky"
-        padding="32"
-        height="100%"
-        border="1em solid rgb(32,97,129)"
-      >
-        <VStack gap="4">
-          <Heading color="yellow" align="center" size="48">
-            Transaction ID
-          </Heading>
-          <Spacer size="16" />
-          <Text align="center" color="white" size="18">
-            {transactionId}
-          </Text>
-          <Spacer size="22" />
-            <Box flexDirection="row" justifyContent="center">
-                <Text color="chocolate" align="center" size="14">created by</Text>
-                <Spacer size="10" />
-                <Text color="yellow" decoration="underline" align="center" size="14"> @0x94t3z</Text>
-            </Box>
-        </VStack>
-      </Box>
-    ),
-    intents: [
-      <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>View on Exploler</Button.Link>,
-    ]
-  })
-})
- 
-app.transaction('/mint', async (c, next) => {
+app.transaction('/mint/:fid', async (c, next) => {
   await next();
 
   // const userId = c.req.ip; // Example of using IP as a user identifier, adjust as necessary
@@ -192,18 +145,59 @@ app.transaction('/mint', async (c, next) => {
   });
 },
 async (c) => {
+  const { fid } = c.req.param();
+
   // Contract transaction response.
   return c.contract({
     abi,
-    chainId: 'eip155:666666666',
+    chainId: 'eip155:84532',
     functionName: 'mint',
-    to: '0x5806485215C8542C448EcF707aB6321b948cAb90',
-    value: parseEther("0")
+    args: [
+      BigInt(fid),
+       8n],
+    to: '0xfAE621C38b674f9b93D73Ccdd01cbC41Ef3bb663',
+  })
+})
+
+
+app.frame('/finish', (c) => {
+  const { transactionId } = c
+  return c.res({
+    image: (
+      <Box
+        grow
+        alignVertical="center"
+        backgroundColor="anky"
+        padding="32"
+        height="100%"
+        border="1em solid rgb(32,97,129)"
+      >
+        <VStack gap="4">
+          <Heading color="yellow" align="center" size="48">
+            Transaction ID
+          </Heading>
+          <Spacer size="16" />
+          <Text align="center" color="white" size="18">
+            {transactionId}
+          </Text>
+          <Spacer size="22" />
+            <Box flexDirection="row" justifyContent="center">
+                <Text color="chocolate" align="center" size="14">By</Text>
+                <Spacer size="10" />
+                <Text color="yellow" decoration="underline" align="center" size="14"> @jpfraneto & @0x94t3z</Text>
+            </Box>
+        </VStack>
+      </Box>
+    ),
+    intents: [
+      // <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>View on Exploler</Button.Link>,
+      <Button.Link href={`https://sepolia.basescan.org/tx/${transactionId}`}>View on Exploler</Button.Link>,
+    ]
   })
 })
 
 // Uncomment this line code to tested on local server
-devtools(app, { serveStatic });
+// devtools(app, { serveStatic });
 
 export const GET = handle(app)
 export const POST = handle(app)

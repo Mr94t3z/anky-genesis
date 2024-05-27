@@ -15,6 +15,7 @@ export const app = new Frog({
   assetsPath: '/',
   basePath: '/api/frame',
   ui: { vars },
+  browserLocation: 'https://github.com/Mr94t3z/anky-genesis'
   // Supply a Hub to enable frame verification.
   // hub: neynar({ apiKey: 'NEYNAR_FROG_FM' })
 })
@@ -28,7 +29,7 @@ app.frame('/', (c) => {
   return c.res({
     image: '/ankydegengif.gif',
     intents: [
-      <Button action="/pick-random-number">Start 👾</Button>,
+      <Button action="/pick-random-number">MINT</Button>,
     ]
   })
 })

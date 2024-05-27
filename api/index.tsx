@@ -4,8 +4,8 @@ import { Box, Image, Heading, Text, VStack, Spacer, vars } from "../lib/ui.js";
 import { abi } from "../lib/ankyGenesisAbi.js";
 
 // Uncomment this packages to tested on local server
-// import { devtools } from 'frog/dev';
-// import { serveStatic } from 'frog/serve-static';
+import { devtools } from 'frog/dev';
+import { serveStatic } from 'frog/serve-static';
 
 export const app = new Frog({
   assetsPath: '/',
@@ -30,15 +30,12 @@ app.frame('/', (c) => {
       <Box
         grow
         alignVertical="center"
-        backgroundColor="anky"
-        padding="32"
+        width="100%"
         height="100%"
-        border="1em solid rgb(32,97,129)"
       >
         <Image 
-          src="https://i.seadn.io/gcs/files/09f08a1de74e1d97bea4cba193705baa.png?auto=format&dpr=1&w=3840"
-          objectFit="none"
-          width='100%'
+          src="/banner.png"
+          objectFit="contain"
         />
       </Box>
     ),
@@ -206,7 +203,7 @@ async (c) => {
 })
 
 // Uncomment this line code to tested on local server
-// devtools(app, { serveStatic });
+devtools(app, { serveStatic });
 
 export const GET = handle(app)
 export const POST = handle(app)

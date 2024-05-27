@@ -177,7 +177,7 @@ app.frame('/finish', (c) => {
             Transaction ID
           </Heading>
           <Spacer size="16" />
-          <Text align="center" color="white" size="18">
+          <Text align="center" color="white" size="14">
             {transactionId}
           </Text>
           <Spacer size="22" />

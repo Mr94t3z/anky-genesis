@@ -21,7 +21,7 @@ export const app = new Frog({
 
 const baseUrlNeynarV2 = process.env.BASE_URL_NEYNAR_V2;
 const baseUrlReservoir = process.env.BASE_URL_RESEVOIR;
-const tokenAddress = process.env.ANKY_DEGEN_PIXELS_NFT_TOKEN_ADDRESS;
+const contractAddress = process.env.ANKY_DEGEN_PIXELS_NFT_CONTRACT_ADDRESS;
 
 
 app.frame('/', (c) => {
@@ -104,7 +104,7 @@ app.frame('/mint-page', async (c) => {
     for (const ethAddress of ethAddresses) {
         try {
             // Get user tokens for the current Ethereum address
-            const responseUserToken = await fetch(`${baseUrlReservoir}/users/${ethAddress}/tokens/v10?tokens=${tokenAddress}`, {
+            const responseUserToken = await fetch(`${baseUrlReservoir}/users/${ethAddress}/tokens/v10?contract=${contractAddress}`, {
                 headers: {
                     'accept': 'application/json',
                     'x-api-key': process.env.RESERVOIR_API_KEY || '',
@@ -233,7 +233,7 @@ async (c) => {
       args: [
         BigInt(fid),
         BigInt(maxMint)],
-      to: tokenAddress as `0x${string}`,
+      to: contractAddress as `0x${string}`,
     })
   } catch (error) {
     console.error("Transaction failure:", error);

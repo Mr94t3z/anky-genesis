@@ -34,7 +34,7 @@ app.frame('/', (c) => {
         height="100%"
       >
         <Image 
-          src="/banner.png"
+          src="/banner.jpeg"
           objectFit="contain"
         />
       </Box>

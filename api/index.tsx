@@ -161,26 +161,6 @@ app.frame('/mint-page', async (c) => {
     return c.res({
       action: '/finish',
       image: '/numberofmints.gif',
-      // image: (
-      //   <Box
-      //     grow
-      //     alignVertical="center"
-      //     backgroundColor="anky"
-      //     padding="32"
-      //     height="100%"
-      //     border="1em solid rgb(32,97,129)"
-      //   >
-      //     <VStack gap="4">
-      //       <Heading color="yellow" align="center" size="48">
-      //         Anky Genesis
-      //       </Heading>
-      //       <Spacer size="16" />
-      //       <Text align="center" color="white" size="18">
-      //         Congrats @{username}! You can mint {maxMint} NFTs.
-      //       </Text>
-      //     </VStack>
-      //   </Box>
-      // ),
       intents: [
         <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint {total} ankys 👽</Button.Transaction>,
       ]
@@ -199,17 +179,17 @@ app.frame('/mint-page', async (c) => {
         >
           <VStack gap="4">
             <Heading color="red" weight="900" align="center" size="32">
-              Error
+              error
             </Heading>
             <Spacer size="16" />
             <Text align="center" color="white" size="18">
-              Uh oh, something went wrong. Try again.
+              uh oh, something went wrong. try again.
             </Text>
           </VStack>
         </Box>
       ),
       intents: [
-        <Button action="/">Try again 🛸</Button>,
+        <Button action="/">try again 🛸</Button>,
       ]
     });
   }
@@ -250,26 +230,6 @@ app.frame('/finish', (c) => {
   const { transactionId } = c
   return c.res({
     image: '/success.gif',
-    // image: (
-    //   <Box
-    //     grow
-    //     alignVertical="center"
-    //     backgroundColor="anky"
-    //     padding="32"
-    //     height="100%"
-    //     border="1em solid rgb(32,97,129)"
-    //   >
-    //     <VStack gap="4">
-    //       <Heading color="yellow" align="center" size="48">
-    //         Transaction ID
-    //       </Heading>
-    //       <Spacer size="16" />
-    //       <Text align="center" color="white" size="14">
-    //         {transactionId}
-    //       </Text>
-    //     </VStack>
-    //   </Box>
-    // ),
     intents: [
       // <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>view on exploler</Button.Link>,
       <Button.Link href={`https://sepolia.basescan.org/tx/${transactionId}`}>view on exploler</Button.Link>,

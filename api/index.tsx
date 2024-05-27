@@ -1,6 +1,6 @@
-import { Button, Frog } from 'frog'
+import { Button, Frog, TextInput } from 'frog'
 import { handle } from 'frog/vercel'
-import { Box, Image, Heading, Text, VStack, Spacer, vars } from "../lib/ui.js";
+import { Box, Heading, Text, VStack, Spacer, vars } from "../lib/ui.js";
 import { abi } from "../lib/ankyDegenGenesisAbi.js";
 
 // Uncomment this packages to tested on local server
@@ -15,30 +15,63 @@ export const app = new Frog({
   // hub: neynar({ apiKey: 'NEYNAR_FROG_FM' })
 })
 
-let userMintLimits = {};
 
 app.frame('/', (c) => {
-  // Generate a random mint limit between 1 and 8
-  const mintLimit = Math.floor(Math.random() * 8) + 1;
-  // const userId = c.req.ip; // Example of using IP as a user identifier, adjust as necessary
-
-  // // Store the mint limit for the user
-  // userMintLimits[userId] = mintLimit;
-
   return c.res({
     image: '/ankydegengif.gif',
     intents: [
-      <Button action="/mint-page">MINT</Button>,
+      <Button action="/pick-random-number">MINT</Button>,
     ]
   })
 })
 
+app.frame('/pick-random-number', (c) => {
+  return c.res({
+    image: '/dynamic_changing_numbers.gif',
+    intents: [
+      <TextInput placeholder="Pick a number from 1 to 8." />,
+      <Button action="/mint-page">submit</Button>,
+    ]
+  })
+})
 
 app.frame('/mint-page', async (c) => {
-  const { frameData } = c;
+  const { inputText, frameData } = c;
   const { fid } = frameData as unknown as { buttonIndex?: number; fid?: string };
 
-  let userMintLimits = 4;
+  const userNumber = inputText ? parseInt(inputText, 10) : 0;
+  
+  // Validate the input number
+  if (isNaN(userNumber) || userNumber < 1 || userNumber > 8) {
+    return c.res({
+      image: (
+        <Box
+          grow
+          alignVertical="center"
+          backgroundColor="anky"
+          padding="48"
+          textAlign="center"
+          height="100%"
+        >
+          <VStack gap="4">
+            <Heading color="red" weight="900" align="center" size="32">
+              Failed
+            </Heading>
+            <Spacer size="16" />
+            <Text align="center" color="white" size="18">
+              You must pick a number from 1 to 8.
+            </Text>
+          </VStack>
+        </Box>
+      ),
+      intents: [
+        <Button action="/pick-random-number">Try again</Button>,
+      ]
+    });
+  }
+
+  // Generate a random number between 1 and 8
+  const maxMint = Math.floor(Math.random() * 8) + 1;
 
   try {
     const response = await fetch(`https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid}`, {
@@ -69,19 +102,13 @@ app.frame('/mint-page', async (c) => {
             </Heading>
             <Spacer size="16" />
             <Text align="center" color="white" size="18">
-              Congrats @{userData.username}! You can mint NFTs.
+              Congrats @{userData.username}! You can mint {maxMint} NFTs.
             </Text>
-            <Spacer size="22" />
-              <Box flexDirection="row" justifyContent="center">
-                  <Text color="chocolate" align="center" size="14">By</Text>
-                  <Spacer size="10" />
-                  <Text color="yellow" decoration="underline" align="center" size="14"> @jpfraneto & @0x94t3z</Text>
-              </Box>
           </VStack>
         </Box>
       ),
       intents: [
-        <Button.Transaction target={`/mint/${fid}`}>Mint NFT</Button.Transaction>,
+        <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint NFT 👽</Button.Transaction>,
       ]
     });
   } catch (error) {
@@ -91,25 +118,19 @@ app.frame('/mint-page', async (c) => {
         <Box
           grow
           alignVertical="center"
-          backgroundColor="red"
+          backgroundColor="anky"
           padding="48"
           textAlign="center"
           height="100%"
         >
           <VStack gap="4">
-            <Heading color="fcPurple" weight="900" align="center" size="32">
+            <Heading color="red" weight="900" align="center" size="32">
               Error
             </Heading>
             <Spacer size="16" />
-            <Text align="center" size="16">
+            <Text align="center" color="white" size="18">
               Uh oh, something went wrong. Try again.
             </Text>
-            <Spacer size="22" />
-              <Box flexDirection="row" justifyContent="center">
-                    <Text color="chocolate" align="center" size="14">By</Text>
-                    <Spacer size="10" />
-                    <Text color="yellow" decoration="underline" align="center" size="14"> @jpfraneto & @0x94t3z</Text>
-              </Box>
           </VStack>
         </Box>
       ),
@@ -120,21 +141,8 @@ app.frame('/mint-page', async (c) => {
   }
 });
  
-app.transaction('/mint/:fid', async (c, next) => {
+app.transaction('/mint/:fid/:maxMint', async (c, next) => {
   await next();
-
-  // const userId = c.req.ip; // Example of using IP as a user identifier, adjust as necessary
-  // const mintLimit = userMintLimits[userId] || 0;
-  // let userMints = c.state.userMints || 0;
-
-  // // Check if the user can mint more NFTs
-  // if (userMints >= mintLimit) {
-  //   return c.res.json({ error: 'Mint limit reached' }, { status: 403 });
-  // }
-
-  // userMints += 1;
-  // c.state.userMints = userMints;
-
   const txParams = await c.res.json();
   txParams.attribution = false;
   console.log(txParams);
@@ -145,18 +153,22 @@ app.transaction('/mint/:fid', async (c, next) => {
   });
 },
 async (c) => {
-  const { fid } = c.req.param();
-
-  // Contract transaction response.
-  return c.contract({
-    abi,
-    chainId: 'eip155:84532',
-    functionName: 'mint',
-    args: [
-      BigInt(fid),
-       8n],
-    to: '0xfAE621C38b674f9b93D73Ccdd01cbC41Ef3bb663',
-  })
+  const { fid, maxMint } = c.req.param();
+  try {
+    // Contract transaction response.
+    return c.contract({
+      abi,
+      chainId: 'eip155:84532',
+      functionName: 'mint',
+      args: [
+        BigInt(fid),
+        BigInt(maxMint)],
+      to: '0xfAE621C38b674f9b93D73Ccdd01cbC41Ef3bb663',
+    })
+  } catch (error) {
+    console.error("Transaction failure:", error);
+    return new Response('dang', { status: 400 })
+  }
 })
 
 
@@ -180,12 +192,6 @@ app.frame('/finish', (c) => {
           <Text align="center" color="white" size="14">
             {transactionId}
           </Text>
-          <Spacer size="22" />
-            <Box flexDirection="row" justifyContent="center">
-                <Text color="chocolate" align="center" size="14">By</Text>
-                <Spacer size="10" />
-                <Text color="yellow" decoration="underline" align="center" size="14"> @jpfraneto & @0x94t3z</Text>
-            </Box>
         </VStack>
       </Box>
     ),

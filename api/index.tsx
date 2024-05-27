@@ -15,7 +15,7 @@ export const app = new Frog({
   assetsPath: '/',
   basePath: '/api/frame',
   ui: { vars },
-  browserLocation: 'https://github.com/Mr94t3z/anky-genesis'
+  browserLocation: 'https://anky.degen'
   // Supply a Hub to enable frame verification.
   // hub: neynar({ apiKey: 'NEYNAR_FROG_FM' })
 })
@@ -29,7 +29,7 @@ app.frame('/', (c) => {
   return c.res({
     image: '/ankydegengif.gif',
     intents: [
-      <Button action="/pick-random-number">MINT</Button>,
+      <Button action="/pick-random-number">mint</Button>,
     ]
   })
 })
@@ -38,7 +38,7 @@ app.frame('/pick-random-number', (c) => {
   return c.res({
     image: '/dynamic_changing_numbers.gif',
     intents: [
-      <TextInput placeholder="Pick a number from 1 to 8." />,
+      <TextInput placeholder="how many do you want? (max is 8)" />,
       <Button action="/mint-page">submit</Button>,
     ]
   })
@@ -64,17 +64,17 @@ app.frame('/mint-page', async (c) => {
         >
           <VStack gap="4">
             <Heading color="red" weight="900" align="center" size="32">
-              Failed
+              failed
             </Heading>
             <Spacer size="16" />
             <Text align="center" color="white" size="18">
-              You must pick a number from 1 to 8.
+              you must pick a number from 1 to 8.
             </Text>
           </VStack>
         </Box>
       ),
       intents: [
-        <Button action="/pick-random-number">Try again 🛸</Button>,
+        <Button action="/pick-random-number">try again 🛸</Button>,
       ]
     });
   }
@@ -96,7 +96,7 @@ app.frame('/mint-page', async (c) => {
     const userFarcasterData = await responseUserData.json();
     const userData = userFarcasterData.users[0];
 
-    const username = userData.username;
+    // const username = userData.username;
 
     // User connected wallet addresses
     const ethAddresses = userData.verified_addresses.eth_addresses.map((address: string) => address.toLowerCase());
@@ -146,11 +146,11 @@ app.frame('/mint-page', async (c) => {
           >
             <VStack gap="4">
               <Heading color="red" weight="900" align="center" size="32">
-                Failed
+                failed
               </Heading>
               <Spacer size="16" />
               <Text align="center" color="white" size="18">
-                Uh oh, you've already minted these NFTs.
+                uh oh, you've already minted these NFTs.
               </Text>
             </VStack>
           </Box>
@@ -160,28 +160,29 @@ app.frame('/mint-page', async (c) => {
 
     return c.res({
       action: '/finish',
-      image: (
-        <Box
-          grow
-          alignVertical="center"
-          backgroundColor="anky"
-          padding="32"
-          height="100%"
-          border="1em solid rgb(32,97,129)"
-        >
-          <VStack gap="4">
-            <Heading color="yellow" align="center" size="48">
-              Anky Genesis
-            </Heading>
-            <Spacer size="16" />
-            <Text align="center" color="white" size="18">
-              Congrats @{username}! You can mint {maxMint} NFTs.
-            </Text>
-          </VStack>
-        </Box>
-      ),
+      image: '/numberofmints.gif',
+      // image: (
+      //   <Box
+      //     grow
+      //     alignVertical="center"
+      //     backgroundColor="anky"
+      //     padding="32"
+      //     height="100%"
+      //     border="1em solid rgb(32,97,129)"
+      //   >
+      //     <VStack gap="4">
+      //       <Heading color="yellow" align="center" size="48">
+      //         Anky Genesis
+      //       </Heading>
+      //       <Spacer size="16" />
+      //       <Text align="center" color="white" size="18">
+      //         Congrats @{username}! You can mint {maxMint} NFTs.
+      //       </Text>
+      //     </VStack>
+      //   </Box>
+      // ),
       intents: [
-        <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint {total} NFT 👽</Button.Transaction>,
+        <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint {total} ankys 👽</Button.Transaction>,
       ]
     });
   } catch (error) {
@@ -248,30 +249,31 @@ async (c) => {
 app.frame('/finish', (c) => {
   const { transactionId } = c
   return c.res({
-    image: (
-      <Box
-        grow
-        alignVertical="center"
-        backgroundColor="anky"
-        padding="32"
-        height="100%"
-        border="1em solid rgb(32,97,129)"
-      >
-        <VStack gap="4">
-          <Heading color="yellow" align="center" size="48">
-            Transaction ID
-          </Heading>
-          <Spacer size="16" />
-          <Text align="center" color="white" size="14">
-            {transactionId}
-          </Text>
-        </VStack>
-      </Box>
-    ),
+    image: '/success.gif',
+    // image: (
+    //   <Box
+    //     grow
+    //     alignVertical="center"
+    //     backgroundColor="anky"
+    //     padding="32"
+    //     height="100%"
+    //     border="1em solid rgb(32,97,129)"
+    //   >
+    //     <VStack gap="4">
+    //       <Heading color="yellow" align="center" size="48">
+    //         Transaction ID
+    //       </Heading>
+    //       <Spacer size="16" />
+    //       <Text align="center" color="white" size="14">
+    //         {transactionId}
+    //       </Text>
+    //     </VStack>
+    //   </Box>
+    // ),
     intents: [
-      // <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>View on Exploler</Button.Link>,
-      <Button.Link href={`https://sepolia.basescan.org/tx/${transactionId}`}>View on Exploler</Button.Link>,
-      <Button action='/'>Home 🛸</Button>,
+      // <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>view on exploler</Button.Link>,
+      <Button.Link href={`https://sepolia.basescan.org/tx/${transactionId}`}>view on exploler</Button.Link>,
+      <Button action='/'>home 🛸</Button>,
     ]
   })
 })

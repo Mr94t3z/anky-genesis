@@ -9,7 +9,7 @@ import { abi } from "../lib/ankyGenesisAbi.js";
 
 export const app = new Frog({
   assetsPath: '/',
-  basePath: '/api',
+  basePath: '/api/frame',
   ui: { vars },
   // Supply a Hub to enable frame verification.
   // hub: neynar({ apiKey: 'NEYNAR_FROG_FM' })

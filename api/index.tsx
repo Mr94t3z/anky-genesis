@@ -23,6 +23,8 @@ export const app = new Frog({
 const baseUrlNeynarV2 = process.env.BASE_URL_NEYNAR_V2;
 const baseUrlReservoir = process.env.BASE_URL_RESEVOIR;
 const contractAddress = process.env.ANKY_DEGEN_PIXELS_NFT_CONTRACT_ADDRESS;
+const CAST_INTENS = 
+  "https://warpcast.com/~/compose?text=&embeds[]=https://anky-genesis.vercel.app/api/frame"
 
 
 app.frame('/', (c) => {
@@ -100,6 +102,9 @@ app.frame('/pick-random-number', async (c) => {
     if (alreadyMinted) {
       return c.res({
         image: '/alreadyminted.gif',
+        intents: [
+          <Button.Link href={CAST_INTENS}>share on warpcast</Button.Link>,
+        ]
       });
     }
 

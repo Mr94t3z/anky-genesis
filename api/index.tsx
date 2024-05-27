@@ -241,8 +241,7 @@ app.frame('/finish', (c) => {
   return c.res({
     image: '/success.gif',
     intents: [
-      // <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>view on degenscan</Button.Link>,
-      <Button.Link href={`https://sepolia.basescan.org/tx/${transactionId}`}>view on degenscan</Button.Link>,
+      <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>view on degenscan</Button.Link>,
       <Button.Link href='https://anky.bot/'>write as anky 🛸</Button.Link>,
     ]
   })

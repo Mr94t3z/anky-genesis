@@ -27,7 +27,7 @@ const contractAddress = process.env.ANKY_DEGEN_PIXELS_NFT_CONTRACT_ADDRESS;
 
 app.frame('/', (c) => {
   return c.res({
-    image: '/ankydegengif.gif',
+    image: '/degenmodeon.gif',
     intents: [
       <Button action="/pick-random-number">mint</Button>,
     ]
@@ -49,35 +49,6 @@ app.frame('/mint-page', async (c) => {
   const { fid } = frameData as unknown as { buttonIndex?: number; fid?: string };
 
   const userNumber = inputText ? parseInt(inputText, 10) : 0;
-  
-  // Validate the input number
-  if (isNaN(userNumber) || userNumber < 1 || userNumber > 8) {
-    return c.res({
-      image: (
-        <Box
-          grow
-          alignVertical="center"
-          backgroundColor="anky"
-          padding="48"
-          textAlign="center"
-          height="100%"
-        >
-          <VStack gap="4">
-            <Heading color="red" weight="900" align="center" size="32">
-              failed
-            </Heading>
-            <Spacer size="16" />
-            <Text align="center" color="white" size="18">
-              you must pick a number from 1 to 8.
-            </Text>
-          </VStack>
-        </Box>
-      ),
-      intents: [
-        <Button action="/pick-random-number">try again 🛸</Button>,
-      ]
-    });
-  }
 
   // Generate a random number between 1 and 8
   const maxMint = Math.floor(Math.random() * 8) + 1;
@@ -158,11 +129,40 @@ app.frame('/mint-page', async (c) => {
       });
     }
 
+    // Validate the input number
+    if (isNaN(userNumber) || userNumber < 1 || userNumber > 8) {
+      return c.res({
+        image: (
+          <Box
+            grow
+            alignVertical="center"
+            backgroundColor="anky"
+            padding="48"
+            textAlign="center"
+            height="100%"
+          >
+            <VStack gap="4">
+              <Heading color="red" weight="900" align="center" size="32">
+                failed
+              </Heading>
+              <Spacer size="16" />
+              <Text align="center" color="white" size="18">
+                you must pick a number from 1 to 8.
+              </Text>
+            </VStack>
+          </Box>
+        ),
+        intents: [
+          <Button action="/pick-random-number">try again 🛸</Button>,
+        ]
+      });
+    }
+
     return c.res({
       action: '/finish',
       image: '/numberofmints.gif',
       intents: [
-        <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint {total} ankys 👽</Button.Transaction>,
+        <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint {total} pixelated ankys 👽</Button.Transaction>,
       ]
     });
   } catch (error) {
@@ -231,9 +231,9 @@ app.frame('/finish', (c) => {
   return c.res({
     image: '/success.gif',
     intents: [
-      // <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>view on exploler</Button.Link>,
-      <Button.Link href={`https://sepolia.basescan.org/tx/${transactionId}`}>view on exploler</Button.Link>,
-      <Button action='/'>home 🛸</Button>,
+      // <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>view on degenscan</Button.Link>,
+      <Button.Link href={`https://sepolia.basescan.org/tx/${transactionId}`}>view on degenscan</Button.Link>,
+      <Button.Link href='https://anky.bot/'>write as anky 🛸</Button.Link>,
     ]
   })
 })

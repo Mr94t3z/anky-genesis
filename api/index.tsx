@@ -28,7 +28,7 @@ app.frame('/', (c) => {
   return c.res({
     image: '/ankydegengif.gif',
     intents: [
-      <Button action="/pick-random-number">Start 🛸</Button>,
+      <Button action="/pick-random-number">Start 👾</Button>,
     ]
   })
 })

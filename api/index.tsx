@@ -34,18 +34,8 @@ app.frame('/', (c) => {
   })
 })
 
-app.frame('/pick-random-number', (c) => {
-  return c.res({
-    image: '/dynamic_changing_numbers.gif',
-    intents: [
-      <TextInput placeholder="how many do you want? (max is 8)" />,
-      <Button action="/mint-page">submit</Button>,
-    ]
-  })
-})
-
-app.frame('/mint-page', async (c) => {
-  const { inputText, frameData } = c;
+app.frame('/pick-random-number', async (c) => {
+  const { frameData } = c;
   const { fid } = frameData as unknown as { buttonIndex?: number; fid?: string };
 
   // Function to fetch user data and check if the user has already minted
@@ -113,51 +103,15 @@ app.frame('/mint-page', async (c) => {
       });
     }
 
-    const userNumber = inputText ? parseInt(inputText, 10) : 0;
-
-    // Validate the input number
-    if (isNaN(userNumber) || userNumber < 1 || userNumber > 8) {
-      return c.res({
-        image: (
-          <Box
-            grow
-            alignVertical="center"
-            backgroundColor="anky"
-            padding="48"
-            textAlign="center"
-            height="100%"
-          >
-            <VStack gap="4">
-              <Heading color="red" weight="900" align="center" size="32">
-                failed
-              </Heading>
-              <Spacer size="16" />
-              <Text align="center" color="white" size="18">
-                you must pick a number from 1 to 8.
-              </Text>
-            </VStack>
-          </Box>
-        ),
-        intents: [
-          <Button action="/pick-random-number">try again 🛸</Button>,
-        ]
-      });
-    }
-
-    // Generate a random number between 1 and 8
-    const maxMint = Math.floor(Math.random() * 8) + 1;
-
-    const total = maxMint.toString();
-
     return c.res({
-      action: '/finish',
-      image: '/numberofmints.gif',
+      image: '/dynamic_changing_numbers.gif',
       intents: [
-        <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint {total} pixelated ankys 👽</Button.Transaction>,
+        <TextInput placeholder="how many do you want? (max is 8)" />,
+        <Button action="/mint-page">submit</Button>,
       ]
     });
   } catch (error) {
-    console.error("Error fetching user data:", error);
+    console.error("Error checking mint status:", error);
     return c.res({
       image: (
         <Box
@@ -185,6 +139,85 @@ app.frame('/mint-page', async (c) => {
     });
   }
 });
+
+app.frame('/mint-page', async (c) => {
+  const { inputText, frameData } = c;
+  const { fid } = frameData as unknown as { buttonIndex?: number; fid?: string };
+
+  const userNumber = inputText ? parseInt(inputText, 10) : 0;
+
+  // Validate the input number
+  if (isNaN(userNumber) || userNumber < 1 || userNumber > 8) {
+    return c.res({
+      image: (
+        <Box
+          grow
+          alignVertical="center"
+          backgroundColor="anky"
+          padding="48"
+          textAlign="center"
+          height="100%"
+        >
+          <VStack gap="4">
+            <Heading color="red" weight="900" align="center" size="32">
+              failed
+            </Heading>
+            <Spacer size="16" />
+            <Text align="center" color="white" size="18">
+              you must pick a number from 1 to 8.
+            </Text>
+          </VStack>
+        </Box>
+      ),
+      intents: [
+        <Button action="/pick-random-number">try again 🛸</Button>,
+      ]
+    });
+  }
+
+  // Generate a random number between 1 and 8
+  const maxMint = Math.floor(Math.random() * 8) + 1;
+
+  const total = maxMint.toString();
+
+  try {
+    return c.res({
+      action: '/finish',
+      image: '/numberofmints.gif',
+      intents: [
+        <Button.Transaction target={`/mint/${fid}/${maxMint}`}>mint {total} pixelated ankys 👽</Button.Transaction>,
+      ]
+    });
+  } catch (error) {
+    console.error("Error processing mint:", error);
+    return c.res({
+      image: (
+        <Box
+          grow
+          alignVertical="center"
+          backgroundColor="anky"
+          padding="48"
+          textAlign="center"
+          height="100%"
+        >
+          <VStack gap="4">
+            <Heading color="red" weight="900" align="center" size="32">
+              error
+            </Heading>
+            <Spacer size="16" />
+            <Text align="center" color="white" size="18">
+              uh oh, something went wrong. try again.
+            </Text>
+          </VStack>
+        </Box>
+      ),
+      intents: [
+        <Button action="/">try again 🛸</Button>,
+      ]
+    });
+  }
+});
+
  
 app.transaction('/mint/:fid/:maxMint', async (c, next) => {
   await next();

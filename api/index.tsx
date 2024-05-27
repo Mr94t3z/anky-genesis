@@ -48,63 +48,66 @@ app.frame('/mint-page', async (c) => {
   const { inputText, frameData } = c;
   const { fid } = frameData as unknown as { buttonIndex?: number; fid?: string };
 
-  const userNumber = inputText ? parseInt(inputText, 10) : 0;
+  // Function to fetch user data and check if the user has already minted
+  const hasUserAlreadyMinted = async (fid: string | undefined) => {
+    try {
+      const responseUserData = await fetch(`${baseUrlNeynarV2}/user/bulk?fids=${fid}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'api_key': process.env.NEYNAR_API_KEY || '',
+        },
+      });
 
-  // Generate a random number between 1 and 8
-  const maxMint = Math.floor(Math.random() * 8) + 1;
+      const userFarcasterData = await responseUserData.json();
+      const userData = userFarcasterData.users[0];
 
-  const total = maxMint.toString();
+      // User connected wallet addresses
+      const ethAddresses = userData.verified_addresses.eth_addresses.map((address: string) => address.toLowerCase());
+
+      // Array to store token counts for each address
+      const tokenCounts = [];
+
+      for (const ethAddress of ethAddresses) {
+          try {
+              // Get user tokens for the current Ethereum address
+              const responseUserToken = await fetch(`${baseUrlReservoir}/users/${ethAddress}/tokens/v10?contract=${contractAddress}`, {
+                  headers: {
+                      'accept': 'application/json',
+                      'x-api-key': process.env.RESERVOIR_API_KEY || '',
+                  },
+              });
+
+              const userTokenData = await responseUserToken.json();
+
+              if (userTokenData && userTokenData.tokens && userTokenData.tokens.length > 0) {
+                  const tokenCount = userTokenData.tokens[0].ownership.tokenCount;
+                  tokenCounts.push(tokenCount);
+                  console.log(`Token Count for ${ethAddress}:`, tokenCount);
+              } else {
+                  console.log(`No tokens found for ${ethAddress}.`);
+                  tokenCounts.push(0);
+              }
+          } catch (error) {
+              console.error(`Error fetching tokens for ${ethAddress}:`, error);
+              tokenCounts.push(0);
+          }
+      }
+
+      // Calculate total token count
+      const totalTokenCount = tokenCounts.reduce((acc, count) => acc + parseInt(count), 0);
+
+      return totalTokenCount >= 1;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      throw error;
+    }
+  };
 
   try {
-    const responseUserData = await fetch(`${baseUrlNeynarV2}/user/bulk?fids=${fid}`, {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json',
-        'api_key': process.env.NEYNAR_API_KEY || '',
-      },
-    });
+    const alreadyMinted = await hasUserAlreadyMinted(fid);
 
-    const userFarcasterData = await responseUserData.json();
-    const userData = userFarcasterData.users[0];
-
-    // const username = userData.username;
-
-    // User connected wallet addresses
-    const ethAddresses = userData.verified_addresses.eth_addresses.map((address: string) => address.toLowerCase());
-
-    // Array to store token counts for each address
-    const tokenCounts = [];
-
-    for (const ethAddress of ethAddresses) {
-        try {
-            // Get user tokens for the current Ethereum address
-            const responseUserToken = await fetch(`${baseUrlReservoir}/users/${ethAddress}/tokens/v10?contract=${contractAddress}`, {
-                headers: {
-                    'accept': 'application/json',
-                    'x-api-key': process.env.RESERVOIR_API_KEY || '',
-                },
-            });
-
-            const userTokenData = await responseUserToken.json();
-
-            if (userTokenData && userTokenData.tokens && userTokenData.tokens.length > 0) {
-                const tokenCount = userTokenData.tokens[0].ownership.tokenCount;
-                tokenCounts.push(tokenCount);
-                console.log(`Token Count for ${ethAddress}:`, tokenCount);
-            } else {
-                console.log(`No tokens found for ${ethAddress}.`);
-                tokenCounts.push(0);
-            }
-        } catch (error) {
-            console.error(`Error fetching tokens for ${ethAddress}:`, error);
-            tokenCounts.push(0);
-        }
-    }
-
-    // Calculate total token count
-    const totalTokenCount = tokenCounts.reduce((acc, count) => acc + parseInt(count), 0);
-
-    if (totalTokenCount >= 1) {
+    if (alreadyMinted) {
       return c.res({
         image: (
           <Box
@@ -128,6 +131,8 @@ app.frame('/mint-page', async (c) => {
         ),
       });
     }
+
+    const userNumber = inputText ? parseInt(inputText, 10) : 0;
 
     // Validate the input number
     if (isNaN(userNumber) || userNumber < 1 || userNumber > 8) {
@@ -157,6 +162,11 @@ app.frame('/mint-page', async (c) => {
         ]
       });
     }
+
+    // Generate a random number between 1 and 8
+    const maxMint = Math.floor(Math.random() * 8) + 1;
+
+    const total = maxMint.toString();
 
     return c.res({
       action: '/finish',

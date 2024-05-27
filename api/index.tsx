@@ -69,29 +69,29 @@ app.frame('/mint-page', async (c) => {
       const tokenCounts = [];
 
       for (const ethAddress of ethAddresses) {
-          try {
-              // Get user tokens for the current Ethereum address
-              const responseUserToken = await fetch(`${baseUrlReservoir}/users/${ethAddress}/tokens/v10?contract=${contractAddress}`, {
-                  headers: {
-                      'accept': 'application/json',
-                      'x-api-key': process.env.RESERVOIR_API_KEY || '',
-                  },
-              });
+        try {
+          // Get user tokens for the current Ethereum address
+          const responseUserToken = await fetch(`${baseUrlReservoir}/users/${ethAddress}/tokens/v10?contract=${contractAddress}`, {
+            headers: {
+              'accept': 'application/json',
+              'x-api-key': process.env.RESERVOIR_API_KEY || '',
+            },
+          });
 
-              const userTokenData = await responseUserToken.json();
+          const userTokenData = await responseUserToken.json();
 
-              if (userTokenData && userTokenData.tokens && userTokenData.tokens.length > 0) {
-                  const tokenCount = userTokenData.tokens[0].ownership.tokenCount;
-                  tokenCounts.push(tokenCount);
-                  console.log(`Token Count for ${ethAddress}:`, tokenCount);
-              } else {
-                  console.log(`No tokens found for ${ethAddress}.`);
-                  tokenCounts.push(0);
-              }
-          } catch (error) {
-              console.error(`Error fetching tokens for ${ethAddress}:`, error);
-              tokenCounts.push(0);
+          if (userTokenData && userTokenData.tokens && userTokenData.tokens.length > 0) {
+            const tokenCount = userTokenData.tokens[0].ownership.tokenCount;
+            tokenCounts.push(tokenCount);
+            console.log(`Token Count for ${ethAddress}:`, tokenCount);
+          } else {
+            console.log(`No tokens found for ${ethAddress}.`);
+            tokenCounts.push(0);
           }
+        } catch (error) {
+          console.error(`Error fetching tokens for ${ethAddress}:`, error);
+          tokenCounts.push(0);
+        }
       }
 
       // Calculate total token count

@@ -109,26 +109,7 @@ app.frame('/mint-page', async (c) => {
 
     if (alreadyMinted) {
       return c.res({
-        image: (
-          <Box
-            grow
-            alignVertical="center"
-            backgroundColor="anky"
-            padding="48"
-            textAlign="center"
-            height="100%"
-          >
-            <VStack gap="4">
-              <Heading color="red" weight="900" align="center" size="32">
-                failed
-              </Heading>
-              <Spacer size="16" />
-              <Text align="center" color="white" size="18">
-                uh oh, you've already minted these NFTs.
-              </Text>
-            </VStack>
-          </Box>
-        ),
+        image: '/alreadyminted.gif',
       });
     }
 
@@ -222,7 +203,7 @@ async (c) => {
     // Contract transaction response.
     return c.contract({
       abi,
-      chainId: 'eip155:84532',
+      chainId: 'eip155:666666666',
       functionName: 'mint',
       args: [
         BigInt(fid),

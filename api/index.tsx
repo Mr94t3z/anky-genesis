@@ -147,7 +147,7 @@ app.frame('/mint-page', async (c) => {
               </Heading>
               <Spacer size="16" />
               <Text align="center" color="white" size="18">
-                Uh oh, you've already mint NFTs.
+                Uh oh, you've already minted these NFTs.
               </Text>
             </VStack>
           </Box>

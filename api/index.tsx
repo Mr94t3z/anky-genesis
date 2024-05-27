@@ -2,10 +2,14 @@ import { Button, Frog, TextInput } from 'frog'
 import { handle } from 'frog/vercel'
 import { Box, Heading, Text, VStack, Spacer, vars } from "../lib/ui.js";
 import { abi } from "../lib/ankyDegenGenesisAbi.js";
+import dotenv from 'dotenv';
 
 // Uncomment this packages to tested on local server
 // import { devtools } from 'frog/dev';
 // import { serveStatic } from 'frog/serve-static';
+
+// Load environment variables from .env file
+dotenv.config();
 
 export const app = new Frog({
   assetsPath: '/',
@@ -14,6 +18,10 @@ export const app = new Frog({
   // Supply a Hub to enable frame verification.
   // hub: neynar({ apiKey: 'NEYNAR_FROG_FM' })
 })
+
+const baseUrlNeynarV2 = process.env.BASE_URL_NEYNAR_V2;
+const baseUrlReservoir = process.env.BASE_URL_RESEVOIR;
+const tokenAddress = process.env.ANKY_DEGEN_PIXELS_NFT_TOKEN_ADDRESS;
 
 
 app.frame('/', (c) => {
@@ -65,7 +73,7 @@ app.frame('/mint-page', async (c) => {
         </Box>
       ),
       intents: [
-        <Button action="/pick-random-number">Try again</Button>,
+        <Button action="/pick-random-number">Try again 🛸</Button>,
       ]
     });
   }
@@ -74,16 +82,78 @@ app.frame('/mint-page', async (c) => {
   const maxMint = Math.floor(Math.random() * 8) + 1;
 
   try {
-    const response = await fetch(`https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid}`, {
+    const responseUserData = await fetch(`${baseUrlNeynarV2}/user/bulk?fids=${fid}`, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'api_key': 'NEYNAR_API_DOCS',
+        'api_key': process.env.NEYNAR_API_KEY || '',
       },
     });
 
-    const data = await response.json();
-    const userData = data.users[0];
+    const userFarcasterData = await responseUserData.json();
+    const userData = userFarcasterData.users[0];
+
+    const username = userData.username;
+
+    // User connected wallet addresses
+    const ethAddresses = userData.verified_addresses.eth_addresses.map((address: string) => address.toLowerCase());
+
+    // Array to store token counts for each address
+    const tokenCounts = [];
+
+    for (const ethAddress of ethAddresses) {
+        try {
+            // Get user tokens for the current Ethereum address
+            const responseUserToken = await fetch(`${baseUrlReservoir}/users/${ethAddress}/tokens/v10?tokens=${tokenAddress}`, {
+                headers: {
+                    'accept': 'application/json',
+                    'x-api-key': process.env.RESERVOIR_API_KEY || '',
+                },
+            });
+
+            const userTokenData = await responseUserToken.json();
+
+            if (userTokenData && userTokenData.tokens && userTokenData.tokens.length > 0) {
+                const tokenCount = userTokenData.tokens[0].ownership.tokenCount;
+                tokenCounts.push(tokenCount);
+                console.log(`Token Count for ${ethAddress}:`, tokenCount);
+            } else {
+                console.log(`No tokens found for ${ethAddress}.`);
+                tokenCounts.push(0);
+            }
+        } catch (error) {
+            console.error(`Error fetching tokens for ${ethAddress}:`, error);
+            tokenCounts.push(0);
+        }
+    }
+
+    // Calculate total token count
+    const totalTokenCount = tokenCounts.reduce((acc, count) => acc + parseInt(count), 0);
+
+    if (totalTokenCount >= 1) {
+      return c.res({
+        image: (
+          <Box
+            grow
+            alignVertical="center"
+            backgroundColor="anky"
+            padding="48"
+            textAlign="center"
+            height="100%"
+          >
+            <VStack gap="4">
+              <Heading color="red" weight="900" align="center" size="32">
+                Failed
+              </Heading>
+              <Spacer size="16" />
+              <Text align="center" color="white" size="18">
+                Uh oh, you've already mint NFTs.
+              </Text>
+            </VStack>
+          </Box>
+        ),
+      });
+    }
 
     return c.res({
       action: '/finish',
@@ -102,7 +172,7 @@ app.frame('/mint-page', async (c) => {
             </Heading>
             <Spacer size="16" />
             <Text align="center" color="white" size="18">
-              Congrats @{userData.username}! You can mint {maxMint} NFTs.
+              Congrats @{username}! You can mint {maxMint} NFTs.
             </Text>
           </VStack>
         </Box>
@@ -135,7 +205,7 @@ app.frame('/mint-page', async (c) => {
         </Box>
       ),
       intents: [
-        <Button action="/">Try again</Button>,
+        <Button action="/">Try again 🛸</Button>,
       ]
     });
   }
@@ -163,7 +233,7 @@ async (c) => {
       args: [
         BigInt(fid),
         BigInt(maxMint)],
-      to: '0xfAE621C38b674f9b93D73Ccdd01cbC41Ef3bb663',
+      to: tokenAddress as `0x${string}`,
     })
   } catch (error) {
     console.error("Transaction failure:", error);
@@ -198,6 +268,7 @@ app.frame('/finish', (c) => {
     intents: [
       // <Button.Link href={`https://explorer.degen.tips/tx/${transactionId}`}>View on Exploler</Button.Link>,
       <Button.Link href={`https://sepolia.basescan.org/tx/${transactionId}`}>View on Exploler</Button.Link>,
+      <Button action='/'>Home 🛸</Button>,
     ]
   })
 })
